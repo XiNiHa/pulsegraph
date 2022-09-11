@@ -1,0 +1,14 @@
+{
+  "name": "@pulsegraph/runtime",
+  "packageManager": "yarn@3.2.3",
+  "dependencies": {
+    "nanostores": "^0.7.0",
+    "ts-pattern": "^4.0.5"
+  },
+  "peerDependencies": {
+    "graphql": "16"
+  },
+  "devDependencies": {
+    "graphql": "^16.6.0"
+  }
+}
