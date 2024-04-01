@@ -1,0 +1,16 @@
+{
+  "name": "@pulsegraph/core",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "author": "XiNiHa <me@xiniha.dev>",
+  "license": "MIT",
+  "scripts": {
+    "build": "rescript",
+    "dev": "rescript -w"
+  },
+  "devDependencies": {
+    "@rescript/core": "^1.1.0",
+    "rescript": "^11.0.1"
+  }
+}

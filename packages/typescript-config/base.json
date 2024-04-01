@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
+  "compilerOptions": {
+    "target": "ESNext",
+    "strict": true,
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "incremental": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "lib": ["es2022"],
+  }
+}

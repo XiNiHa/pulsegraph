@@ -1,0 +1,25 @@
+{
+  "name": "@repo/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "library.js"
+  ],
+  "exports": {
+    "./library": {
+      "types": "./library.d.ts",
+      "import": "./library.js"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^8.57.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.12.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-simple-import-sort": "^12.0.0",
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^7.4.0"
+  }
+}
