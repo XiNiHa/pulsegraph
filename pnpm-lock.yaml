@@ -22,6 +22,10 @@ importers:
         version: 1.13.0
 
   packages/core:
+    dependencies:
+      '@tanstack/store':
+        specifier: ^0.3.1
+        version: 0.3.1
     devDependencies:
       '@rescript/core':
         specifier: ^1.1.0
@@ -156,6 +160,10 @@ packages:
     dependencies:
       rescript: 11.0.1
     dev: true
+
+  /@tanstack/store@0.3.1:
+    resolution: {integrity: sha512-A49KN8SpLMWaNmZGPa9K982RQ81W+m7W6iStcQVeKeVS70JZRqkF0fDwKByREPq6qz9/kS0aQFOPQ0W6wIeU5g==}
+    dev: false
 
   /@types/eslint@8.56.5:
     resolution: {integrity: sha512-u5/YPJHo1tvkSF2CE0USEkxon82Z5DBy2xR+qfyYNszpX9qcs4sT6uq2kBbj4BXY1+DBGDPnrhMZV3pKWGNukw==}

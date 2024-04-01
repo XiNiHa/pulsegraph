@@ -12,5 +12,8 @@
   "devDependencies": {
     "@rescript/core": "^1.1.0",
     "rescript": "^11.0.1"
+  },
+  "dependencies": {
+    "@tanstack/store": "^0.3.1"
   }
 }
