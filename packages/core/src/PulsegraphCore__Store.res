@@ -1,38 +1,67 @@
 module Path = {
-  type t = string
+  type t
+  type plain
 
-  let resolve = (~segment, ~value, ~parentPath=?) => {
+  external toActual: string => t = "%identity"
+  external toPlain: string => plain = "%identity"
+  external actualToString: t => string = "%identity"
+  external plainToString: plain => string = "%identity"
+
+  let segmentRepr = segment => {
     open PulsegraphCore.GraphQL
 
-    let segmentRepr = switch segment {
+    switch segment {
     | Key(key) => key
     | Index(index) => Int.toString(index)
     }
+  }
 
-    let fallbackPath = switch parentPath {
-    | Some(parentPath) => `${parentPath}:${segmentRepr}`
-    | None => segmentRepr
-    }
+  let resolvePlain = (~segment, ~parentPath: option<plain>=?) => {
+    let segment = segmentRepr(segment)
+    switch parentPath {
+    | Some(parentPath) => `${plainToString(parentPath)}:${segment}`
+    | None => segment
+    }->toPlain
+  }
 
-    (switch value {
+  let plainToActual = (plain, value) => {
+    switch value {
     | JSON.Object(dict) => {
         let id = Dict.get(dict, "id")
 
         switch id {
         | Some(JSON.String(id)) => id
         | Some(JSON.Number(id)) => Float.toString(id)
-        | Some(_) | None => // ID field is missing, or not an ID type
-          fallbackPath
+        | Some(_) | None =>
+          // ID field is missing, or not an ID type
+          plainToString(plain)
         }
       }
-    | _ => fallbackPath
-    } :> t)
+    | _ => plainToString(plain)
+    }->toActual
+  }
+
+  let resolve = (~segment, ~value, ~parentPath=?) => {
+    resolvePlain(~segment, ~parentPath?)->plainToActual(value)
+  }
+
+  let tryPlainFromError = error => {
+    open PulsegraphCore.GraphQL.Response
+
+    error.path->Option.map(path =>
+      path
+      ->Array.map(segmentRepr)
+      ->Array.concat(["root"], _)
+      ->Array.joinWith(":")
+      ->toPlain
+    )
   }
 }
 
+type value = Scalar(PulsegraphCore.GraphQL.Scalar.t) | Error(PulsegraphCore.GraphQL.Response.error)
 type content =
-  | Value(PulsegraphCore.GraphQL.Scalar.t)
-  | Values(array<PulsegraphCore.GraphQL.Scalar.t>)
+  | Value(value)
+  | Values(array<value>)
   | Reference(Path.t)
   | References(array<Null.t<Path.t>>)
 
@@ -91,14 +120,42 @@ module ScalarArray = {
     })
   }
 
-  let toContent = array => {
+  let toContent = (array, path, payloadErrors) => {
     open PulsegraphCore.GraphQL
+
+    let handleNull = index => {
+      let path = Path.resolvePlain(~segment=Index(index), ~parentPath=path)
+      let error = payloadErrors->Array.find(error => Path.tryPlainFromError(error) == Some(path))
+      switch error {
+      | Some(error) => Error(error)
+      | None => Scalar(Null)
+      }
+    }
+
     Values(
       switch array {
-      | String(arr) => arr->Array.map(s => s->Null.map(s => Scalar.String(s))->Null.getOr(Null))
-      | Number(arr) => arr->Array.map(n => n->Null.map(n => Scalar.Number(n))->Null.getOr(Null))
-      | Boolean(arr) => arr->Array.map(b => b->Null.map(b => Scalar.Boolean(b))->Null.getOr(Null))
-      | Null(arr) => arr->Array.map(() => Scalar.Null)
+      | String(arr) =>
+        arr->Array.mapWithIndex((value, i): value => {
+          switch value {
+          | Value(s) => Scalar(String(s))
+          | Null => handleNull(i)
+          }
+        })
+      | Number(arr) =>
+        arr->Array.mapWithIndex((value, i): value => {
+          switch value {
+          | Value(n) => Scalar(Number(n))
+          | Null => handleNull(i)
+          }
+        })
+      | Boolean(arr) =>
+        arr->Array.mapWithIndex((value, i): value => {
+          switch value {
+          | Value(b) => Scalar(Boolean(b))
+          | Null => handleNull(i)
+          }
+        })
+      | Null(arr) => arr->Array.mapWithIndex((_, i): value => handleNull(i))
       },
     )
   }
@@ -116,82 +173,98 @@ let make = () => {
   store: TanStackStore.make(~initialState=Map.make()),
 }
 
-let rec processDict = (~store, ~path, ~dict, ~commitedAt) => {
-  let putContent = (segment, content, path) => {
-    open PulsegraphCore.GraphQL
+let processData = (~store, ~dict, ~commitedAt, ~payloadErrors) => {
+  let rec processDict = (~path: Path.t, ~plainPath: Path.plain, ~dict) => {
+    let putContent = (segment, content, path) => {
+      open PulsegraphCore.GraphQL
 
-    let object = switch Map.get(TanStackStore.state(store), path) {
-    | Some(entry) => entry
-    | None => {
-        let object = Dict.make()
-        Map.set(TanStackStore.state(store), path, object)
-        object
+      let object = switch Map.get(TanStackStore.state(store), path) {
+      | Some(entry) => entry
+      | None => {
+          let object = Dict.make()
+          Map.set(TanStackStore.state(store), path, object)
+          object
+        }
       }
+      Dict.set(
+        object,
+        switch segment {
+        | Key(key) => key
+        | Index(index) => Int.toString(index)
+        },
+        {
+          content,
+          commitedAt,
+        },
+      )
     }
-    Dict.set(
-      object,
-      switch segment {
-      | Key(key) => key
-      | Index(index) => Int.toString(index)
-      },
-      {
-        content,
-        commitedAt,
-      },
-    )
-  }
 
-  let errors =
-    dict
-    ->Dict.toArray
-    ->Array.reduce([], (errors, (key, value)) => {
-      let itemPath = Path.resolve(~segment=Key(key), ~value, ~parentPath=path)
-      switch value {
-      | String(value) => putContent(Key(key), Value(String(value)), path)
-      | Number(value) => putContent(Key(key), Value(Number(value)), path)
-      | Boolean(value) => putContent(Key(key), Value(Boolean(value)), path)
-      | Null => putContent(Key(key), Value(Null), path)
-      | Object(dict) => {
-          switch processDict(~store, ~path=itemPath, ~dict, ~commitedAt) {
-          | Ok() => ()
-          | Error(errors') => Array.pushMany(errors, errors')
+    let errors =
+      dict
+      ->Dict.toArray
+      ->Array.reduce([], (errors, (key, value)) => {
+        let itemPlainPath = Path.resolvePlain(~segment=Key(key), ~parentPath=plainPath)
+        let itemPath = Path.plainToActual(itemPlainPath, value)
+        switch value {
+        | String(value) => putContent(Key(key), Value(Scalar(String(value))), path)
+        | Number(value) => putContent(Key(key), Value(Scalar(Number(value))), path)
+        | Boolean(value) => putContent(Key(key), Value(Scalar(Boolean(value))), path)
+        | Null => {
+            let error =
+              payloadErrors->Array.find(error =>
+                Path.tryPlainFromError(error) == Some(itemPlainPath)
+              )
+            switch error {
+            | Some(error) => putContent(Key(key), Value(Error(error)), path)
+            | None => putContent(Key(key), Value(Scalar(Null)), path)
+            }
           }
-          putContent(Key(key), Reference(itemPath), path)
-        }
-      | Array(values) =>
-        switch ScalarArray.tryFrom(values) {
-        | Mixed => Array.push(errors, `Array of mixed types at "${path}"`)
-        | Scalar(arr) => putContent(Key(key), ScalarArray.toContent(arr), path)
-        | Object(arr) => {
-            let refArray = Array.mapWithIndex(arr, (value, index) =>
-              switch value {
-              | Null => Null.Null
-              | Value(dict) => {
-                  let path = Path.resolve(
-                    ~segment=Index(index),
-                    ~value=Object(dict),
-                    ~parentPath=itemPath,
-                  )
-                  switch processDict(~store, ~path, ~dict, ~commitedAt) {
-                  | Ok() => ()
-                  | Error(errors') => Array.pushMany(errors, errors')
+        | Object(dict) => {
+            switch processDict(~path=itemPath, ~plainPath=itemPlainPath, ~dict) {
+            | Ok() => ()
+            | Error(errors') => Array.pushMany(errors, errors')
+            }
+            putContent(Key(key), Reference(itemPath), path)
+          }
+        | Array(values) =>
+          switch ScalarArray.tryFrom(values) {
+          | Mixed => Array.push(errors, `Array of mixed types at "${Path.actualToString(path)}"`)
+          | Scalar(arr) =>
+            putContent(Key(key), ScalarArray.toContent(arr, itemPlainPath, payloadErrors), path)
+          | Object(arr) => {
+              let refArray = Array.mapWithIndex(arr, (value, index) =>
+                switch value {
+                | Null => Null.Null
+                | Value(dict) => {
+                    let plainPath = Path.resolvePlain(
+                      ~segment=Index(index),
+                      ~parentPath=itemPlainPath,
+                    )
+                    let path = Path.plainToActual(plainPath, Object(dict))
+                    switch processDict(~path, ~plainPath, ~dict) {
+                    | Ok() => ()
+                    | Error(errors') => Array.pushMany(errors, errors')
+                    }
+                    Value(path)
                   }
-                  Value(path)
                 }
-              }
-            )
-            putContent(Key(key), References(refArray), path)
+              )
+              putContent(Key(key), References(refArray), path)
+            }
+          | Invalid =>
+            Array.push(errors, `Array of unknown or invalid types at "${Path.actualToString(path)}"`)
           }
-        | Invalid => Array.push(errors, `Array of unknown or invalid types at "${path}"`)
         }
-      }
-      errors
-    })
+        errors
+      })
 
-  switch Array.length(errors) {
-  | 0 => Ok()
-  | _ => Error(errors)
+    switch Array.length(errors) {
+    | 0 => Ok()
+    | _ => Error(errors)
+    }
   }
+
+  processDict(~path=Path.toActual("root"), ~plainPath=Path.toPlain("root"), ~dict)
 }
 
 let commitPayload = (store, payload) => {
@@ -200,10 +273,15 @@ let commitPayload = (store, payload) => {
   switch payload.data {
   | Some(dict) => {
       let commitedAt = Date.now()
-      let path = Path.resolve(~segment=Key("root"), ~value=Object(dict))
       let result = ref(Ok())
       TanStackStore.batch(store.store, () => {
-        result := processDict(~store=store.store, ~path, ~dict, ~commitedAt)
+        result :=
+          processData(
+            ~store=store.store,
+            ~dict,
+            ~commitedAt,
+            ~payloadErrors=payload.errors->Option.getOr([]),
+          )
       })
       result.contents
     }

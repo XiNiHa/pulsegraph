@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import * as Store from "./PulsegraphCore__Store.gen.js";
+import * as GraphQL from "./PulsegraphCore__GraphQL.gen.js";
 
-const Value = <T>(value: T) => ({ TAG: "Value", _0: value });
-const Values = <T>(values: T[]) => ({ TAG: "Values", _0: values });
+const Scalar = (value: GraphQL.Scalar_t) => ({ TAG: "Scalar", _0: value });
+const Error = (error: GraphQL.Response_error) => ({ TAG: "Error", _0: error });
+type Scalar = ReturnType<typeof Scalar>;
+type Error = ReturnType<typeof Error>;
+type Value = Scalar | Error;
+
+const Value = (value: Value) => ({ TAG: "Value", _0: value });
+const Values = (values: Value[]) => ({ TAG: "Values", _0: values });
 const Reference = (value: string) => ({ TAG: "Reference", _0: value });
 const References = (values: (string | null)[]) => ({
   TAG: "References",
@@ -27,7 +34,12 @@ describe("PulsegraphCore.Store", () => {
       const state = Object.fromEntries(map.entries());
 
       expect(state).toEqual({
-        root: { foo: { content: Value(10), commitedAt: expect.any(Number) } },
+        root: {
+          foo: {
+            content: Value(Scalar(10)),
+            commitedAt: expect.any(Number),
+          },
+        },
       });
     });
 
@@ -40,7 +52,12 @@ describe("PulsegraphCore.Store", () => {
       const state = Object.fromEntries(map.entries());
 
       expect(state).toEqual({
-        root: { foo: { content: Value(null), commitedAt: expect.any(Number) } },
+        root: {
+          foo: {
+            content: Value(Scalar(null)),
+            commitedAt: expect.any(Number),
+          },
+        },
       });
     });
 
@@ -60,8 +77,8 @@ describe("PulsegraphCore.Store", () => {
           },
         },
         "root:foo": {
-          bar: { content: Value(10), commitedAt: expect.any(Number) },
-          baz: { content: Value(null), commitedAt: expect.any(Number) },
+          bar: { content: Value(Scalar(10)), commitedAt: expect.any(Number) },
+          baz: { content: Value(Scalar(null)), commitedAt: expect.any(Number) },
         },
       });
     });
@@ -79,9 +96,9 @@ describe("PulsegraphCore.Store", () => {
           foo: { content: Reference("duh"), commitedAt: expect.any(Number) },
         },
         duh: {
-          id: { content: Value("duh"), commitedAt: expect.any(Number) },
-          bar: { content: Value(10), commitedAt: expect.any(Number) },
-          baz: { content: Value(null), commitedAt: expect.any(Number) },
+          id: { content: Value(Scalar("duh")), commitedAt: expect.any(Number) },
+          bar: { content: Value(Scalar(10)), commitedAt: expect.any(Number) },
+          baz: { content: Value(Scalar(null)), commitedAt: expect.any(Number) },
         },
       });
     });
@@ -99,9 +116,9 @@ describe("PulsegraphCore.Store", () => {
           foo: { content: Reference("1"), commitedAt: expect.any(Number) },
         },
         "1": {
-          id: { content: Value(1), commitedAt: expect.any(Number) },
-          bar: { content: Value(10), commitedAt: expect.any(Number) },
-          baz: { content: Value(null), commitedAt: expect.any(Number) },
+          id: { content: Value(Scalar(1)), commitedAt: expect.any(Number) },
+          bar: { content: Value(Scalar(10)), commitedAt: expect.any(Number) },
+          baz: { content: Value(Scalar(null)), commitedAt: expect.any(Number) },
         },
       });
     });
@@ -116,7 +133,10 @@ describe("PulsegraphCore.Store", () => {
 
       expect(state).toEqual({
         root: {
-          foo: { content: Values([10]), commitedAt: expect.any(Number) },
+          foo: {
+            content: Values([Scalar(10)]),
+            commitedAt: expect.any(Number),
+          },
         },
       });
     });
@@ -131,7 +151,10 @@ describe("PulsegraphCore.Store", () => {
 
       expect(state).toEqual({
         root: {
-          foo: { content: Values([null]), commitedAt: expect.any(Number) },
+          foo: {
+            content: Values([Scalar(null)]),
+            commitedAt: expect.any(Number),
+          },
         },
       });
     });
@@ -146,7 +169,10 @@ describe("PulsegraphCore.Store", () => {
 
       expect(state).toEqual({
         root: {
-          foo: { content: Values([10, null]), commitedAt: expect.any(Number) },
+          foo: {
+            content: Values([Scalar(10), Scalar(null)]),
+            commitedAt: expect.any(Number),
+          },
         },
       });
     });
@@ -168,11 +194,11 @@ describe("PulsegraphCore.Store", () => {
         },
         "root:foo:0": {
           bar: {
-            content: Value(10),
+            content: Value(Scalar(10)),
             commitedAt: expect.any(Number),
           },
           baz: {
-            content: Value(null),
+            content: Value(Scalar(null)),
             commitedAt: expect.any(Number),
           },
         },
@@ -196,15 +222,15 @@ describe("PulsegraphCore.Store", () => {
         },
         duh: {
           id: {
-            content: Value("duh"),
+            content: Value(Scalar("duh")),
             commitedAt: expect.any(Number),
           },
           bar: {
-            content: Value(10),
+            content: Value(Scalar(10)),
             commitedAt: expect.any(Number),
           },
           baz: {
-            content: Value(null),
+            content: Value(Scalar(null)),
             commitedAt: expect.any(Number),
           },
         },
@@ -228,15 +254,15 @@ describe("PulsegraphCore.Store", () => {
         },
         "1": {
           id: {
-            content: Value(1),
+            content: Value(Scalar(1)),
             commitedAt: expect.any(Number),
           },
           bar: {
-            content: Value(10),
+            content: Value(Scalar(10)),
             commitedAt: expect.any(Number),
           },
           baz: {
-            content: Value(null),
+            content: Value(Scalar(null)),
             commitedAt: expect.any(Number),
           },
         },
@@ -260,11 +286,185 @@ describe("PulsegraphCore.Store", () => {
         },
         "root:foo:0": {
           bar: {
-            content: Value(10),
+            content: Value(Scalar(10)),
             commitedAt: expect.any(Number),
           },
           baz: {
-            content: Value(null),
+            content: Value(Scalar(null)),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles top level errors", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: null },
+        errors: [{ message: "error", path: ["foo"] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Value(Error({ message: "error", path: ["foo"] })),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles errors in top level arrays", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: [null] },
+        errors: [{ message: "error", path: ["foo", 0] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Values([Error({ message: "error", path: ["foo", 0] })]),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles errors in objects without id", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: { bar: null } },
+        errors: [{ message: "error", path: ["foo", "bar"] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Reference("root:foo"),
+            commitedAt: expect.any(Number),
+          },
+        },
+        "root:foo": {
+          bar: {
+            content: Value(Error({ message: "error", path: ["foo", "bar"] })),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles errors in objects with string id", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: { id: "duh", bar: null } },
+        errors: [{ message: "error", path: ["foo", "bar"] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Reference("duh"),
+            commitedAt: expect.any(Number),
+          },
+        },
+        duh: {
+          id: {
+            content: Value(Scalar("duh")),
+            commitedAt: expect.any(Number),
+          },
+          bar: {
+            content: Value(Error({ message: "error", path: ["foo", "bar"] })),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles errors in objects with int id", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: { id: 1, bar: null } },
+        errors: [{ message: "error", path: ["foo", "bar"] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Reference("1"),
+            commitedAt: expect.any(Number),
+          },
+        },
+        "1": {
+          id: {
+            content: Value(Scalar(1)),
+            commitedAt: expect.any(Number),
+          },
+          bar: {
+            content: Value(Error({ message: "error", path: ["foo", "bar"] })),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly handles errors in nested objects with id", () => {
+      const store = Store.make();
+      const payload = {
+        data: { foo: { id: "meh", bar: { id: "duh", baz: null } } },
+        errors: [{ message: "error", path: ["foo", "bar", "baz"] }],
+      };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: Reference("meh"),
+            commitedAt: expect.any(Number),
+          },
+        },
+        meh: {
+          id: {
+            content: Value(Scalar("meh")),
+            commitedAt: expect.any(Number),
+          },
+          bar: {
+            content: Reference("duh"),
+            commitedAt: expect.any(Number),
+          },
+        },
+        duh: {
+          id: {
+            content: Value(Scalar("duh")),
+            commitedAt: expect.any(Number),
+          },
+          baz: {
+            content: Value(
+              Error({ message: "error", path: ["foo", "bar", "baz"] }),
+            ),
             commitedAt: expect.any(Number),
           },
         },

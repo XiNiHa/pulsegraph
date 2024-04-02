@@ -1,9 +1,15 @@
+module Path: {
+  @genType.import("./shims/Path.shim.js")
+  type t
+}
+
 type t
+type value = Scalar(PulsegraphCore__GraphQL.Scalar.t) | Error(PulsegraphCore__GraphQL.Response.error)
 type content =
-  | Value(PulsegraphCore__GraphQL.Scalar.t)
-  | Values(array<PulsegraphCore__GraphQL.Scalar.t>)
-  | Reference(string)
-  | References(array<Null.t<string>>)
+  | Value(value)
+  | Values(array<value>)
+  | Reference(Path.t)
+  | References(array<Null.t<Path.t>>)
 type field = {
   content: content,
   commitedAt: Date.msSinceEpoch,
@@ -16,4 +22,4 @@ let make: unit => t
 let commitPayload: (t, PulsegraphCore__GraphQL.Response.t) => result<unit, array<string>>
 
 @genType
-let getState: t => Map.t<string, Dict.t<field>>
+let getState: t => Map.t<Path.t, Dict.t<field>>
