@@ -6,12 +6,16 @@
   "author": "XiNiHa <me@xiniha.dev>",
   "license": "MIT",
   "scripts": {
-    "build": "rescript",
-    "dev": "rescript -w"
+    "build": "rescript && tsc",
+    "dev": "rescript -w",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@rescript/core": "^1.1.0",
-    "rescript": "^11.0.1"
+    "rescript": "^11.0.1",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
   },
   "dependencies": {
     "@tanstack/store": "^0.3.1"
