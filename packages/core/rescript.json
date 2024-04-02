@@ -18,6 +18,12 @@
   "gentypeconfig": {
     "module": "es6",
     "moduleResolution": "node16",
-    "generatedFileExtension": ".gen.ts"
+    "generatedFileExtension": ".gen.ts",
+    "shims": {
+      "Dict-RescriptCore": "Dict",
+      "JSON-RescriptCore": "JSON",
+      "Date-RescriptCore": "Date",
+      "Map-RescriptCore": "Map"
+    }
   }
 }
