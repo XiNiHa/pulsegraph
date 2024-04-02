@@ -10,6 +10,7 @@ export default typescript.config(
   eslint.configs.recommended,
   ...typescript.configs.recommendedTypeChecked,
   {
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: { project, tsconfigRootDir: cwd },
     },
