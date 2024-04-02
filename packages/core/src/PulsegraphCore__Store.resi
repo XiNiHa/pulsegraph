@@ -3,7 +3,7 @@ type content =
   | Value(PulsegraphCore__GraphQL.Scalar.t)
   | Values(array<PulsegraphCore__GraphQL.Scalar.t>)
   | Reference(string)
-  | References(array<option<string>>)
+  | References(array<Null.t<string>>)
 type field = {
   content: content,
   commitedAt: Date.msSinceEpoch,

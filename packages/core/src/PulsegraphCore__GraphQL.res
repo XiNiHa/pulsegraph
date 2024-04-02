@@ -7,7 +7,7 @@ module Scalar = {
     | String(string)
     | Number(float)
     | Boolean(bool)
-    | Null
+    | @as(null) Null
 }
 
 @genType

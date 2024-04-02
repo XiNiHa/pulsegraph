@@ -4,7 +4,10 @@ import * as Store from "./PulsegraphCore__Store.gen.js";
 const Value = <T>(value: T) => ({ TAG: "Value", _0: value });
 const Values = <T>(values: T[]) => ({ TAG: "Values", _0: values });
 const Reference = (value: string) => ({ TAG: "Reference", _0: value });
-const References = (values: string[]) => ({ TAG: "References", _0: values });
+const References = (values: (string | null)[]) => ({
+  TAG: "References",
+  _0: values,
+});
 
 describe("PulsegraphCore.Store", () => {
   describe("Correct cases", () => {
@@ -15,7 +18,7 @@ describe("PulsegraphCore.Store", () => {
       expect(state.size).toBe(0);
     });
 
-    it("correctly commits simple payload", () => {
+    it("correctly commits a scalar", () => {
       const store = Store.make();
       const payload = { data: { foo: 10 } };
 
@@ -28,9 +31,22 @@ describe("PulsegraphCore.Store", () => {
       });
     });
 
+    it("correctly commits null", () => {
+      const store = Store.make();
+      const payload = { data: { foo: null } };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: { foo: { content: Value(null), commitedAt: expect.any(Number) } },
+      });
+    });
+
     it("correctly commits object without id", () => {
       const store = Store.make();
-      const payload = { data: { foo: { bar: 10 } } };
+      const payload = { data: { foo: { bar: 10, baz: null } } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -45,13 +61,14 @@ describe("PulsegraphCore.Store", () => {
         },
         "root:foo": {
           bar: { content: Value(10), commitedAt: expect.any(Number) },
+          baz: { content: Value(null), commitedAt: expect.any(Number) },
         },
       });
     });
 
     it("correctly commits object with string id", () => {
       const store = Store.make();
-      const payload = { data: { foo: { id: "duh", bar: 10 } } };
+      const payload = { data: { foo: { id: "duh", bar: 10, baz: null } } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -64,13 +81,14 @@ describe("PulsegraphCore.Store", () => {
         duh: {
           id: { content: Value("duh"), commitedAt: expect.any(Number) },
           bar: { content: Value(10), commitedAt: expect.any(Number) },
+          baz: { content: Value(null), commitedAt: expect.any(Number) },
         },
       });
     });
 
     it("correctly commits object with int id", () => {
       const store = Store.make();
-      const payload = { data: { foo: { id: 1, bar: 10 } } };
+      const payload = { data: { foo: { id: 1, bar: 10, baz: null } } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -83,6 +101,7 @@ describe("PulsegraphCore.Store", () => {
         "1": {
           id: { content: Value(1), commitedAt: expect.any(Number) },
           bar: { content: Value(10), commitedAt: expect.any(Number) },
+          baz: { content: Value(null), commitedAt: expect.any(Number) },
         },
       });
     });
@@ -102,9 +121,39 @@ describe("PulsegraphCore.Store", () => {
       });
     });
 
+    it("correctly commits top level array with nulls", () => {
+      const store = Store.make();
+      const payload = { data: { foo: [null] } };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: { content: Values([null]), commitedAt: expect.any(Number) },
+        },
+      });
+    });
+
+    it("correctly commits top level array with scalars and nulls", () => {
+      const store = Store.make();
+      const payload = { data: { foo: [10, null] } };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: { content: Values([10, null]), commitedAt: expect.any(Number) },
+        },
+      });
+    });
+
     it("correctly commits top level array with objects without id", () => {
       const store = Store.make();
-      const payload = { data: { foo: [{ bar: 10 }] } };
+      const payload = { data: { foo: [{ bar: 10, baz: null }] } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -122,13 +171,17 @@ describe("PulsegraphCore.Store", () => {
             content: Value(10),
             commitedAt: expect.any(Number),
           },
+          baz: {
+            content: Value(null),
+            commitedAt: expect.any(Number),
+          },
         },
       });
     });
 
     it("correctly commits top level array with objects with string id", () => {
       const store = Store.make();
-      const payload = { data: { foo: [{ id: "duh", bar: 10 }] } };
+      const payload = { data: { foo: [{ id: "duh", bar: 10, baz: null }] } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -150,13 +203,17 @@ describe("PulsegraphCore.Store", () => {
             content: Value(10),
             commitedAt: expect.any(Number),
           },
+          baz: {
+            content: Value(null),
+            commitedAt: expect.any(Number),
+          },
         },
       });
     });
 
     it("correctly commits top level array with objects with int id", () => {
       const store = Store.make();
-      const payload = { data: { foo: [{ id: 1, bar: 10 }] } };
+      const payload = { data: { foo: [{ id: 1, bar: 10, baz: null }] } };
 
       Store.commitPayload(store, payload);
       const map = Store.getState(store);
@@ -176,6 +233,38 @@ describe("PulsegraphCore.Store", () => {
           },
           bar: {
             content: Value(10),
+            commitedAt: expect.any(Number),
+          },
+          baz: {
+            content: Value(null),
+            commitedAt: expect.any(Number),
+          },
+        },
+      });
+    });
+
+    it("correctly commits top level array with objects without id and null", () => {
+      const store = Store.make();
+      const payload = { data: { foo: [{ bar: 10, baz: null }, null] } };
+
+      Store.commitPayload(store, payload);
+      const map = Store.getState(store);
+      const state = Object.fromEntries(map.entries());
+
+      expect(state).toEqual({
+        root: {
+          foo: {
+            content: References(["root:foo:0", null]),
+            commitedAt: expect.any(Number),
+          },
+        },
+        "root:foo:0": {
+          bar: {
+            content: Value(10),
+            commitedAt: expect.any(Number),
+          },
+          baz: {
+            content: Value(null),
             commitedAt: expect.any(Number),
           },
         },

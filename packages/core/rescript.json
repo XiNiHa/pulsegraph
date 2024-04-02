@@ -20,10 +20,11 @@
     "moduleResolution": "node16",
     "generatedFileExtension": ".gen.ts",
     "shims": {
+      "Date-RescriptCore": "Date",
       "Dict-RescriptCore": "Dict",
       "JSON-RescriptCore": "JSON",
-      "Date-RescriptCore": "Date",
-      "Map-RescriptCore": "Map"
+      "Map-RescriptCore": "Map",
+      "Null-RescriptCore": "Null"
     }
   }
 }

@@ -34,55 +34,55 @@ type content =
   | Value(PulsegraphCore.GraphQL.Scalar.t)
   | Values(array<PulsegraphCore.GraphQL.Scalar.t>)
   | Reference(Path.t)
-  | References(array<option<Path.t>>)
+  | References(array<Null.t<Path.t>>)
 
 module ScalarArray = {
   type t =
-    | String(array<option<string>>)
-    | Number(array<option<float>>)
-    | Boolean(array<option<bool>>)
+    | String(array<Null.t<string>>)
+    | Number(array<Null.t<float>>)
+    | Boolean(array<Null.t<bool>>)
     | Null(array<unit>)
 
-  type result = Scalar(t) | Object(array<option<Dict.t<JSON.t>>>) | Invalid | Mixed
+  type result = Scalar(t) | Object(array<Null.t<Dict.t<JSON.t>>>) | Invalid | Mixed
 
   let tryFrom = array => {
     array->Array.reduce(Scalar(Null([])), (result, value) => {
       switch (result, value) {
       | (Scalar(String(arr)), JSON.String(value)) =>
-        Scalar(String(Array.concat(arr, [Some(value)])))
+        Scalar(String(Array.concat(arr, [Value(value)])))
       | (Scalar(Number(arr)), JSON.Number(value)) =>
-        Scalar(Number(Array.concat(arr, [Some(value)])))
+        Scalar(Number(Array.concat(arr, [Value(value)])))
       | (Scalar(Boolean(arr)), JSON.Boolean(value)) =>
-        Scalar(Boolean(Array.concat(arr, [Some(value)])))
+        Scalar(Boolean(Array.concat(arr, [Value(value)])))
       | (Scalar(Null(arr)), JSON.Null) => Scalar(Null(Array.concat(arr, [()])))
       | (Scalar(Null(arr)), JSON.String(value)) =>
         arr
-        ->Array.map(() => None)
-        ->Array.concat([Some(value)])
+        ->Array.map(() => Null.Null)
+        ->Array.concat([Value(value)])
         ->String
         ->Scalar
       | (Scalar(Null(arr)), JSON.Number(value)) =>
         arr
-        ->Array.map(() => None)
-        ->Array.concat([Some(value)])
+        ->Array.map(() => Null.Null)
+        ->Array.concat([Value(value)])
         ->Number
         ->Scalar
       | (Scalar(Null(arr)), JSON.Boolean(value)) =>
         arr
-        ->Array.map(() => None)
-        ->Array.concat([Some(value)])
+        ->Array.map(() => Null.Null)
+        ->Array.concat([Value(value)])
         ->Boolean
         ->Scalar
       | (Scalar(Null(arr)), JSON.Object(value)) =>
         arr
-        ->Array.map(() => None)
-        ->Array.concat([Some(value)])
+        ->Array.map(() => Null.Null)
+        ->Array.concat([Value(value)])
         ->Object
-      | (Scalar(String(arr)), JSON.Null) => Scalar(String(Array.concat(arr, [None])))
-      | (Scalar(Number(arr)), JSON.Null) => Scalar(Number(Array.concat(arr, [None])))
-      | (Scalar(Boolean(arr)), JSON.Null) => Scalar(Boolean(Array.concat(arr, [None])))
-      | (Object(arr), JSON.Object(value)) => Object(Array.concat(arr, [Some(value)]))
-      | (Object(arr), JSON.Null) => Object(Array.concat(arr, [None]))
+      | (Scalar(String(arr)), JSON.Null) => Scalar(String(Array.concat(arr, [Null])))
+      | (Scalar(Number(arr)), JSON.Null) => Scalar(Number(Array.concat(arr, [Null])))
+      | (Scalar(Boolean(arr)), JSON.Null) => Scalar(Boolean(Array.concat(arr, [Null])))
+      | (Object(arr), JSON.Object(value)) => Object(Array.concat(arr, [Value(value)]))
+      | (Object(arr), JSON.Null) => Object(Array.concat(arr, [Null]))
       | (_, JSON.Array(_)) => Invalid
       | (Mixed, _) => Mixed
       | (Invalid, _) => Invalid
@@ -95,10 +95,9 @@ module ScalarArray = {
     open PulsegraphCore.GraphQL
     Values(
       switch array {
-      | String(arr) => arr->Array.map(s => s->Option.map(s => Scalar.String(s))->Option.getOr(Null))
-      | Number(arr) => arr->Array.map(n => n->Option.map(n => Scalar.Number(n))->Option.getOr(Null))
-      | Boolean(arr) =>
-        arr->Array.map(b => b->Option.map(b => Scalar.Boolean(b))->Option.getOr(Null))
+      | String(arr) => arr->Array.map(s => s->Null.map(s => Scalar.String(s))->Null.getOr(Null))
+      | Number(arr) => arr->Array.map(n => n->Null.map(n => Scalar.Number(n))->Null.getOr(Null))
+      | Boolean(arr) => arr->Array.map(b => b->Null.map(b => Scalar.Boolean(b))->Null.getOr(Null))
       | Null(arr) => arr->Array.map(() => Scalar.Null)
       },
     )
@@ -166,8 +165,8 @@ let rec processDict = (~store, ~path, ~dict, ~commitedAt) => {
         | Object(arr) => {
             let refArray = Array.mapWithIndex(arr, (value, index) =>
               switch value {
-              | None => None
-              | Some(dict) => {
+              | Null => Null.Null
+              | Value(dict) => {
                   let path = Path.resolve(
                     ~segment=Index(index),
                     ~value=Object(dict),
@@ -177,7 +176,7 @@ let rec processDict = (~store, ~path, ~dict, ~commitedAt) => {
                   | Ok() => ()
                   | Error(errors') => Array.pushMany(errors, errors')
                   }
-                  Some(path)
+                  Value(path)
                 }
               }
             )
