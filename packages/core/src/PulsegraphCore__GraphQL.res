@@ -1,5 +1,6 @@
 @genType @unboxed type pathSegment = Key(string) | Index(int)
 
+@genType
 module Scalar = {
   @unboxed
   type t =

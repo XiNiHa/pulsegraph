@@ -1,7 +1,7 @@
 type t
 type content =
-  | Value(PulsegraphCore.GraphQL.Scalar.t)
-  | Values(array<PulsegraphCore.GraphQL.Scalar.t>)
+  | Value(PulsegraphCore__GraphQL.Scalar.t)
+  | Values(array<PulsegraphCore__GraphQL.Scalar.t>)
   | Reference(string)
   | References(array<option<string>>)
 type field = {
