@@ -32,10 +32,10 @@ importers:
     devDependencies:
       '@rescript/core':
         specifier: ^1.1.0
-        version: 1.1.0(rescript@11.0.1)
+        version: 1.1.0(rescript@11.1.0-rc.6)
       rescript:
-        specifier: ^11.0.1
-        version: 11.0.1
+        specifier: ^11.1.0-rc.6
+        version: 11.1.0-rc.6
       typescript:
         specifier: ^5.4.3
         version: 5.4.3
@@ -436,12 +436,12 @@ packages:
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     dev: true
 
-  /@rescript/core@1.1.0(rescript@11.0.1):
+  /@rescript/core@1.1.0(rescript@11.1.0-rc.6):
     resolution: {integrity: sha512-pz/CL8+9hBUTeMpUouvZohNsa5rqIwurlXoa1CZWN0ZKuWjMVjaoQ3V+0NB72J/QBbs6/8W82VABKBaDn3fGCA==}
     peerDependencies:
       rescript: '>=11.0.0 || ^11.1.0-rc.2'
     dependencies:
-      rescript: 11.0.1
+      rescript: 11.1.0-rc.6
     dev: true
 
   /@rollup/rollup-android-arm-eabi@4.13.2:
@@ -1925,8 +1925,8 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /rescript@11.0.1:
-    resolution: {integrity: sha512-7T4PRp/d0+CBNnY6PYKffFqo9tGZlvnZpboF/n+8SKS+JZ6VvXJO7W538VPZXf3EYx1COGAWWvkF9e/HgSAqHg==}
+  /rescript@11.1.0-rc.6:
+    resolution: {integrity: sha512-chaNkU5xvWC+NOKflmNiQDMj8wu1Vk+SX9vUH84m9gT9cGE49ml1rG25XUPlKQ4EJ+AR+0XYLfxxvzjKYC+qvQ==}
     engines: {node: '>=10'}
     hasBin: true
     requiresBuild: true
