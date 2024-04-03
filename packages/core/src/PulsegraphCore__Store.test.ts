@@ -29,7 +29,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: 10 } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -47,7 +47,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: null } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -65,7 +65,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: { bar: 10, baz: null } } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -87,7 +87,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: { id: "duh", bar: 10, baz: null } } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -107,7 +107,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: { id: 1, bar: 10, baz: null } } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -127,7 +127,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [10] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -145,7 +145,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [null] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -163,7 +163,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [10, null] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -181,7 +181,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [{ bar: 10, baz: null }] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -209,7 +209,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [{ id: "duh", bar: 10, baz: null }] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -241,7 +241,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [{ id: 1, bar: 10, baz: null }] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -273,7 +273,7 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [{ bar: 10, baz: null }, null] } };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -304,7 +304,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo"] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -325,7 +325,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo", 0] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -346,7 +346,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo", "bar"] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -373,7 +373,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo", "bar"] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -404,7 +404,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo", "bar"] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -435,7 +435,7 @@ describe("PulsegraphCore.Store", () => {
         errors: [{ message: "error", path: ["foo", "bar", "baz"] }],
       };
 
-      Store.commitPayload(store, payload);
+      Store.commitPayload(store, {}, payload);
       const map = Store.getState(store);
       const state = Object.fromEntries(map.entries());
 
@@ -477,10 +477,10 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [10, "bar"] } };
 
-      const result = Store.commitPayload(store, payload);
+      const result = Store.commitPayload(store, {}, payload);
       expect(result).toEqual({
         TAG: "Error",
-        _0: [`Array of mixed types at "root"`],
+        _0: [`Array of mixed types at "foo"`],
       });
     });
 
@@ -488,10 +488,10 @@ describe("PulsegraphCore.Store", () => {
       const store = Store.make();
       const payload = { data: { foo: [[10]] } };
 
-      const result = Store.commitPayload(store, payload);
+      const result = Store.commitPayload(store, {}, payload);
       expect(result).toEqual({
         TAG: "Error",
-        _0: [`Array of unknown or invalid types at "root"`],
+        _0: [`Array of unknown or invalid types at "foo"`],
       });
     });
   });

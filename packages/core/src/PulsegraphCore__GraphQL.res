@@ -1,4 +1,25 @@
-@genType @unboxed type pathSegment = Key(string) | Index(int)
+@genType
+module Path = {
+  @unboxed type segment = Key(string) | Index(int)
+  type t = array<segment>
+
+  let segmentToString = segment => {
+    switch segment {
+    | Key(key) => key
+    | Index(index) => Int.toString(index)
+    }
+  }
+
+  let toString = path => {
+    path->Array.reduce("", (acc, segment) => {
+      switch (acc, segment) {
+      | ("", _) => segmentToString(segment)
+      | (acc, Key(key)) => `${acc}.${key}`
+      | (acc, Index(index)) => `${acc}[${Int.toString(index)}]`
+      }
+    })
+  }
+}
 
 @genType
 module Scalar = {
@@ -20,7 +41,7 @@ module Response = {
   type error = {
     message: string,
     locations?: array<errorLocation>,
-    path?: array<pathSegment>,
+    path?: Path.t,
     extensions?: Dict.t<JSON.t>,
   }
 
