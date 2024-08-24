@@ -17,5 +17,5 @@
   },
   "[rescript]": {
     "editor.defaultFormatter": "chenglou92.rescript-vscode"
-  },
+  }
 }

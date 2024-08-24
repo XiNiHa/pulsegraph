@@ -38,7 +38,7 @@ module Key = {
       }
     })
 
-    parts.contents->Array.joinWith(":")->fromString
+    parts.contents->Array.join(":")->fromString
   }
 }
 

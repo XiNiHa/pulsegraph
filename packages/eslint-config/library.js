@@ -24,5 +24,5 @@ export default typescript.config(
     },
   },
   prettierRecommended,
-  { ignores: ["node_modules/", "dist/"] }
+  { ignores: ["node_modules/", "dist/"] },
 );

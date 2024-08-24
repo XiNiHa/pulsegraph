@@ -15,6 +15,6 @@
     "resolveJsonModule": true,
     "checkJs": true,
     "skipLibCheck": true,
-    "lib": ["es2022"],
+    "lib": ["es2022"]
   }
 }

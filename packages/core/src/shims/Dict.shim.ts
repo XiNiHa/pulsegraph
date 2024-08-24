@@ -1,1 +1,1 @@
-export type t<V> = Record<string, V>
+export type t<V> = Record<string, V>;

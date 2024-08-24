@@ -1,1 +1,1 @@
-export type t = unknown
+export type t = unknown;
