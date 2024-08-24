@@ -1,1 +1,1 @@
-export type Path_t = string;
+export type Key_t = string;
